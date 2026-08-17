@@ -1,30 +1,26 @@
 import { io, Socket } from 'socket.io-client';
 
+const RENDER_BACKEND_URL = 'https://cartasdoarthur.onrender.com';
+
 const getSocketUrl = (): string => {
-  // 1. Variável de ambiente configurada na Vercel
+  // 1. Variáveis de ambiente Next.js
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_SOCKET_URL;
+  }
   if (process.env.PUBLIC_SOCKET_URL) {
     return process.env.PUBLIC_SOCKET_URL;
   }
 
-  // 2. Resolução dinâmica no navegador
+  // 2. Se estiver rodando localmente no PC de desenvolvimento
   if (typeof window !== 'undefined') {
-    const { protocol, hostname, origin } = window.location;
-
-    // Se estiver rodando localmente no próprio computador
+    const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:3001';
     }
-
-    // Se estiver rodando na rede Wi-Fi local (ex: 192.168.x.x)
-    if (hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) {
-      return `${protocol}//${hostname}:3001`;
-    }
-
-    // Se estiver hospedado online (Vercel / Render / Domínio Público)
-    return origin;
   }
 
-  return 'http://localhost:3001';
+  // 3. Fallback de Produção para o seu Render Backend
+  return RENDER_BACKEND_URL;
 };
 
 export const socket: Socket = io(getSocketUrl(), {
