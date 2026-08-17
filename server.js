@@ -443,7 +443,7 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event 5: start-game (ONLY 1 RANDOM PLAYER GETS A CORINGA CARD!)
+  // Event 5: start-game
   socket.on('start-game', ({ roomCode }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -477,7 +477,6 @@ io.on('connection', (socket) => {
 
     room.promptCard = room.drawBlackPile.shift();
 
-    // Select ONLY 1 player in the room to hold the Coringa card at game start
     const coringaPlayerIndex = Math.floor(Math.random() * room.players.length);
 
     room.playerHands = {};
@@ -500,7 +499,7 @@ io.on('connection', (socket) => {
     triggerBotSubmissions(code);
   });
 
-  // Event 6: submit-card (SUPPORT CUSTOM TYPED TEXT)
+  // Event 6: submit-card
   socket.on('submit-card', ({ roomCode, cardIds, customText, customText1, customText2 }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -562,7 +561,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Event 8: next-round (REFILL CARDS - MAX 1 CORINGA IN WHOLE ROOM)
+  // Event 8: next-round
   socket.on('next-round', ({ roomCode }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -579,7 +578,6 @@ io.on('connection', (socket) => {
     if (room.drawBlackPile.length === 0) room.drawBlackPile = shuffle(BLACK_CARDS);
     room.promptCard = room.drawBlackPile.shift();
 
-    // Check if any player currently holds a Coringa card in hand
     const hasAnyCoringa = room.players.some((p) => {
       const pHand = room.playerHands[p.id] || [];
       return pHand.some((c) => c.isCustomizable);
@@ -634,7 +632,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log(`[Socket.IO] Client connected: ${socket.id}`);
+    console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
     for (const [code, room] of rooms.entries()) {
       if (room.players.some((p) => p.id === socket.id)) {
         handlePlayerLeave(socket, code);
@@ -723,6 +721,6 @@ function triggerBotVotes(room, code) {
   });
 }
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(` Cartas do Arthur - Socket.IO Server running on port ${PORT}`);
 });
