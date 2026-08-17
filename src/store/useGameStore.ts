@@ -114,7 +114,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
   initSocketListeners: () => {
     const handleConnect = () => {
-      set({ isConnected: true, socketId: socket.id });
+      set({ isConnected: true, socketId: socket.id, errorMessage: null });
 
       const hasRoomParam = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('room');
       if (hasRoomParam) {
@@ -150,6 +150,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
     socket.on('disconnect', () => {
       set({ isConnected: false });
+    });
+
+    socket.on('connect_error', () => {
+      set({
+        isConnected: false,
+        errorMessage: '⚠️ Não foi possível conectar ao servidor de jogo!',
+      });
     });
 
     socket.on('error-message', (msg: string) => {

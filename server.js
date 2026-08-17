@@ -6,7 +6,7 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Cartas do Arthur - Socket.IO Server Running');
+  res.end('Cartas do Arthur - Socket.IO Server Running on Render');
 });
 
 const io = new Server(server, {
@@ -84,7 +84,7 @@ function shuffle(array) {
 function createCustomCard(playerId) {
   return {
     id: `custom_${Date.now()}_${playerId}_${Math.random().toString(36).substring(2, 6)}`,
-    text: '✍️ Escreva você mesmo...',
+    text: ' Escreva você mesmo...',
     isCustomizable: true,
     customText: '',
   };
@@ -168,9 +168,8 @@ function evaluateVotingWinner(room, code) {
 }
 
 io.on('connection', (socket) => {
-  console.log(`[Socket.IO] Client connected: ${socket.id}`);
+  console.log(`[Render Backend] Socket connected: ${socket.id}`);
 
-  // Reconnection support for F5 page refresh
   socket.on('reconnect-player', ({ roomCode, previousPlayerId, playerName, avatar }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -205,7 +204,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Event 1: create-room
   socket.on('create-room', ({ playerName, avatar }) => {
     const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     socket.join(roomCode);
@@ -252,7 +250,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(roomCode);
   });
 
-  // Event 2: join-room
   socket.on('join-room', ({ roomCode, playerName, avatar }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -302,7 +299,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event: update-settings
   socket.on('update-settings', ({ roomCode, totalRounds, roundTimer, isGradualReveal }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -326,7 +322,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event: reveal-submission
   socket.on('reveal-submission', ({ roomCode, submissionId }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -350,7 +345,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event: vote-card
   socket.on('vote-card', ({ roomCode, submissionId }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -369,7 +363,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Event 3: add-bot
   socket.on('add-bot', ({ roomCode, botName, avatar }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -415,7 +408,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event 4: remove-player
   socket.on('remove-player', ({ roomCode, playerId }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -443,7 +435,6 @@ io.on('connection', (socket) => {
     broadcastRoomUpdate(code);
   });
 
-  // Event 5: start-game
   socket.on('start-game', ({ roomCode }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -499,7 +490,6 @@ io.on('connection', (socket) => {
     triggerBotSubmissions(code);
   });
 
-  // Event 6: submit-card
   socket.on('submit-card', ({ roomCode, cardIds, customText, customText1, customText2 }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -561,7 +551,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Event 8: next-round
   socket.on('next-round', ({ roomCode }) => {
     const code = (roomCode || '').trim().toUpperCase();
     const room = rooms.get(code);
@@ -626,13 +615,11 @@ io.on('connection', (socket) => {
     triggerBotSubmissions(code);
   });
 
-  // Event 9: leave-room / disconnect
   socket.on('leave-room', ({ roomCode }) => {
     handlePlayerLeave(socket, roomCode);
   });
 
   socket.on('disconnect', () => {
-    console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
     for (const [code, room] of rooms.entries()) {
       if (room.players.some((p) => p.id === socket.id)) {
         handlePlayerLeave(socket, code);
@@ -722,5 +709,5 @@ function triggerBotVotes(room, code) {
 }
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(` Cartas do Arthur - Socket.IO Server running on port ${PORT}`);
+  console.log(`[Render Backend] Server running on port ${PORT}`);
 });

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Users, PlusCircle, LogIn, Flame } from 'lucide-react';
 import { MOCK_AVATARS } from '../../data/mockData';
+import { useGameStore } from '../../store/useGameStore';
 
 interface HomeScreenProps {
   onCreateGame: (name: string, avatar: string) => void;
@@ -18,6 +19,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('👑');
   const [roomCodeInput, setRoomCodeInput] = useState('');
+
+  const { errorMessage, setErrorMessage } = useGameStore();
 
   // Auto-detect room parameter from URL for multi-tab testing
   useEffect(() => {
@@ -89,6 +92,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
       </header>
+
+      {/* Error Notification */}
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="w-full max-w-md z-20 mb-4 px-4 py-3 rounded-2xl bg-rose-950/90 border-2 border-rose-500/60 text-xs font-bold text-rose-200 shadow-2xl backdrop-blur-md flex items-center justify-between gap-3"
+          >
+            <span>{errorMessage}</span>
+            <button onClick={() => setErrorMessage(null)} className="hover:text-white px-2 font-bold">
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl px-4 z-10 py-12">
